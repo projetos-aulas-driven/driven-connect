@@ -13,6 +13,7 @@
   "author": "Diego M. de Pinho",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^5.16.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-async-errors": "^3.1.1",
@@ -25,6 +26,7 @@
     "@types/node": "^20.14.9",
     "@types/pg": "^8.11.6",
     "nodemon": "^3.1.4",
+    "prisma": "^5.16.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.5.2"
   }
