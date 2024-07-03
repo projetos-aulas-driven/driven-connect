@@ -1,13 +1,26 @@
-import db from "../database";
-import { Contact, CreateContactData } from "../protocols";
+import prisma from "../database";
+import { contacts, phones } from "@prisma/client";
+import { CreateContactData } from "../protocols";
+
+type ContactWithPhones = contacts & {
+  phones: phones
+}
 
 export async function selectAllContacts() {
-  const result = await db.query<Contact>(`SELECT * FROM contacts c`);
-  const contacts = result.rows;
+  const contacts = await prisma.contacts.findMany();
+
+  const contactsWithPhones: ContactWithPhones[] = [];
 
   for (const contact of contacts) {
-    const telefonesResult = await db.query('SELECT * FROM phones WHERE contact_id = $1', [contact.id]);
-    contact.phones = telefonesResult.rows;
+    const phones = await prisma.phones.findFirst({
+      where: {
+        contact_id: contact.id
+      }
+    })
+
+    contactsWithPhones.push({
+      ...contact, phones
+    })
   }
 
   return contacts;
@@ -19,24 +32,24 @@ export async function insertContact(contactData: CreateContactData) {
 }
 
 async function createContact(contactData: CreateContactData) {
-  const { fullname, picture, email } = contactData;
-  const result = await db.query(`
-    INSERT INTO contacts (fullname, picture, email) 
-    VALUES ($1, $2, $3) 
-    RETURNING *
-  `, [fullname, picture, email]);
+  const contact = await prisma.contacts.create({
+    data: {
+      fullname: contactData.fullname,
+      email: contactData.email,
+      picture: contactData.picture
+    }
+  });
 
-  return result.rows[0];
+  return contact;
 }
 
 async function savePhonesFromContact(contactId: number, phones: string[]) {
-  const phonePromises = phones.map(phone => {
-    return db.query(`
-      INSERT INTO phones (contact_id, number) 
-      VALUES ($1, $2) 
-      RETURNING *
-    `, [contactId, phone]);
+  await prisma.phones.createMany({
+    data: phones.map(phone => {
+      return {
+        contact_id: contactId,
+        number: phone
+      }
+    })
   });
-
-  await Promise.all(phonePromises);
 }

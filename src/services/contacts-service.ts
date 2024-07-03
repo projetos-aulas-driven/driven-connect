@@ -7,6 +7,5 @@ export async function getAllContacts() {
 }
 
 export async function createContact(contactData: CreateContactData) {
-  const newContact = await insertContact(contactData);
-  return newContact;
+  await insertContact(contactData);
 }
