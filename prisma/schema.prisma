@@ -7,17 +7,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model contacts {
-  id       Int      @id @default(autoincrement())
-  fullname String   @db.VarChar(255)
-  email    String?  @db.VarChar(255)
-  picture  String?  @db.VarChar(255)
-  phones   phones[]
+model MoreInformation {
+  id        Int      @id @default(autoincrement())
+  contact   Contact? @relation(fields: [contactId], references: [id])
+  contactId Int      @unique
+
+  @@map("moreinfos")
 }
 
-model phones {
-  id         Int      @id @default(autoincrement())
-  number     String   @db.VarChar(20)
-  contact_id Int
-  contacts   contacts @relation(fields: [contact_id], references: [id], onDelete: Cascade, map: "fk_contato_id")
+model Contact {
+  id       Int              @id @default(autoincrement())
+  fullname String
+  email    String?
+  picture  String?
+  phones   Phone[]
+  more     MoreInformation?
+  groups   Group[]
+
+  @@map("contacts")
+}
+
+model Phone {
+  id        Int     @id @default(autoincrement())
+  number    String
+  contactId Int
+  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade, map: "fk_contato_id")
+
+  @@map("phones")
+}
+
+model Group {
+  id       Int       @id @default(autoincrement())
+  title    String    @unique
+  contacts Contact[]
 }
