@@ -9,8 +9,9 @@ import httpStatus from "http-status";
 dotenv.config();
 
 const app = express();
-app.get("/health", (req: Request, res: Response) => res.status(httpStatus.OK).send(`I'm okay!`));
 app.use(json());
+
+app.get("/health", (req: Request, res: Response) => res.status(httpStatus.OK).send(`I'm okay!`));
 app.use(contactRouter);
 app.use(errorHandlerMiddleware);
 

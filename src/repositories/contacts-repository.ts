@@ -11,6 +11,15 @@ export async function selectAllContacts() {
   return contacts;
 }
 
+export async function selectContactById(id: number) {
+  return await prisma.contact.findFirst({
+    where: { id },
+    include: {
+      phones: true
+    }
+  })
+}
+
 export async function insertContact(contactData: CreateContactData) {
   const contact = await prisma.contact.create({
     data: {
