@@ -20,6 +20,12 @@ export async function selectContactById(id: number) {
   })
 }
 
+export async function selectContactByFullname(fullname: string) {
+  return await prisma.contact.findUnique({
+    where: { fullname }
+  });
+}
+
 export async function insertContact(contactData: CreateContactData) {
   const contact = await prisma.contact.create({
     data: {

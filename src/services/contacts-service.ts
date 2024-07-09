@@ -1,5 +1,5 @@
 import { CreateContactData } from "../protocols";
-import { insertContact, selectAllContacts, selectContactById } from "../repositories/contacts-repository";
+import { insertContact, selectAllContacts, selectContactByFullname, selectContactById } from "../repositories/contacts-repository";
 
 export async function getAllContacts() {
   const contacts = await selectAllContacts();
@@ -17,5 +17,11 @@ export async function getContact(id: number) {
 }
 
 export async function createContact(contactData: CreateContactData) {
-  await insertContact(contactData);
+  const existingContact = await selectContactByFullname(contactData.fullname);
+  if (existingContact) throw {
+    type: "conflict",
+    message: "contact already exists"
+  }
+
+  return await insertContact(contactData);
 }

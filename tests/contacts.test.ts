@@ -1,8 +1,23 @@
 import supertest from "supertest";
 import app from "../src/app";
-import { array } from "joi";
 
 const api = supertest(app);
+
+
+describe("POST /contacts", () => {
+  it("should create a contact", async () => {
+    const { status } = await api.post("/contacts").send({
+      fullname: "diego",
+      email: "diego.pinho@driven.com.br",
+      picture: "diego.png",
+      phones: ["11947026341"]
+    });
+
+    expect(status).toBe(201);
+  });
+
+});
+
 
 describe("GET /contacts", () => {
 

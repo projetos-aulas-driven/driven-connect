@@ -18,7 +18,7 @@ export async function getSpecificContact(req: Request, res: Response) {
 
 export async function postContact(req: Request, res: Response) {
   const contactData = req.body as CreateContactData;
-  await createContact(contactData);
+  const newContact = await createContact(contactData);
 
-  return res.status(httpStatus.CREATED);
+  return res.status(httpStatus.CREATED).send(newContact);
 }
