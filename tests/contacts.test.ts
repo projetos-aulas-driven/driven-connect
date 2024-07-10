@@ -1,6 +1,7 @@
 import supertest from "supertest";
 import app from "../src/app";
 import prisma from "../src/database";
+import { createNewContactBody, createNewRandomContact } from "./factories/contact-factory";
 
 const api = supertest(app);
 
@@ -11,15 +12,8 @@ beforeEach(async () => {
 
 describe("POST /contacts", () => {
   it("should create a contact", async () => {
-    const data = {
-      fullname: "diego",
-      email: "diego.pinho@driven.com.br",
-      picture: "diego.png",
-      phones: ["11947026341"]
-    };
-
+    const data = createNewContactBody();
     const { status } = await api.post("/contacts").send(data);
-
     expect(status).toBe(201);
   });
 
@@ -29,49 +23,30 @@ describe("POST /contacts", () => {
 describe("GET /contacts", () => {
 
   it("should return an specific contact", async () => {
-    // create scenario
-    const { id } = await prisma.contact.create({
-      data: {
-        fullname: "Polícia",
-        phones: {
-          create: {
-            number: "190"
-          }
-        }
-      }
-    });
-
-    const { status, body } = await api.get(`/contacts/${id}`);
+    const contact = await createNewRandomContact();
+    const { status, body } = await api.get(`/contacts/${contact.id}`);
     expect(status).toBe(200);
     expect(body).toMatchObject({
-      id: id,
-      fullname: "Polícia",
-      phones: [
-        {
-          number: "190"
-        }
-      ]
+      id: contact.id,
+      fullname: contact.fullname,
+      phones: expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.any(Number),
+          number: expect.any(String),
+        })
+      ])
     });
   });
 
 
   it("should return all contacts", async () => {
 
-    // create scenario
-    await prisma.contact.create({
-      data: {
-        fullname: "Polícia",
-        phones: {
-          create: {
-            number: "190"
-          }
-        }
-      }
-    });
+    await createNewRandomContact();
+    await createNewRandomContact();
 
     const { status, body } = await api.get("/contacts");
     expect(status).toBe(200);
-    expect(body).toHaveLength(1);
+    expect(body).toHaveLength(2);
     expect(body).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
