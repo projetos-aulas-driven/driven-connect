@@ -1,17 +1,24 @@
 import supertest from "supertest";
 import app from "../src/app";
+import prisma from "../src/database";
 
 const api = supertest(app);
 
+beforeEach(async () => {
+  await prisma.phone.deleteMany();
+  await prisma.contact.deleteMany();
+});
 
 describe("POST /contacts", () => {
   it("should create a contact", async () => {
-    const { status } = await api.post("/contacts").send({
+    const data = {
       fullname: "diego",
       email: "diego.pinho@driven.com.br",
       picture: "diego.png",
       phones: ["11947026341"]
-    });
+    };
+
+    const { status } = await api.post("/contacts").send(data);
 
     expect(status).toBe(201);
   });
@@ -22,18 +29,26 @@ describe("POST /contacts", () => {
 describe("GET /contacts", () => {
 
   it("should return an specific contact", async () => {
-    const { status, body } = await api.get("/contacts/1");
+    // create scenario
+    const { id } = await prisma.contact.create({
+      data: {
+        fullname: "Polícia",
+        phones: {
+          create: {
+            number: "190"
+          }
+        }
+      }
+    });
+
+    const { status, body } = await api.get(`/contacts/${id}`);
     expect(status).toBe(200);
-    expect(body).toEqual({
-      "id": 1,
-      "fullname": "Polícia",
-      "email": null,
-      "picture": null,
-      "phones": [
+    expect(body).toMatchObject({
+      id: id,
+      fullname: "Polícia",
+      phones: [
         {
-          "id": 1,
-          "number": "190",
-          "contactId": 1
+          number: "190"
         }
       ]
     });
@@ -41,6 +56,19 @@ describe("GET /contacts", () => {
 
 
   it("should return all contacts", async () => {
+
+    // create scenario
+    await prisma.contact.create({
+      data: {
+        fullname: "Polícia",
+        phones: {
+          create: {
+            number: "190"
+          }
+        }
+      }
+    });
+
     const { status, body } = await api.get("/contacts");
     expect(status).toBe(200);
     expect(body).toHaveLength(1);

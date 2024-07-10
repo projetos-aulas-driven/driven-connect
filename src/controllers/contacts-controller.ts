@@ -10,7 +10,7 @@ export async function getContacts(req: Request, res: Response) {
 
 export async function getSpecificContact(req: Request, res: Response) {
   const id = Number(req.params.id);
-  if (isNaN(id)) return res.send(httpStatus.BAD_REQUEST);
+  if (isNaN(id)) return res.sendStatus(httpStatus.BAD_REQUEST);
 
   const contact = await getContact(id);
   return res.send(contact);
